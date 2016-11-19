@@ -13,7 +13,7 @@ def main():
 
 	# Start game
 	while True:
-		move = input(board.get_player() + " player's turn: ")
+		move = input(board.get_player_string() + " player's turn: ")
 
 		# Check user input
 		if move.lower() == 'quit' or move.lower() == 'q':
@@ -35,14 +35,14 @@ def main():
 def check_input(move, board):
 	# Check for bad move input
 	if not len(move) == 2:
-		print("BAD INPUT!! " + board.get_player() + " try again")
+		print("BAD INPUT!! " + board.get_player_string() + " try again")
 		return False
 	try:
 		if not move[0] in Mark.COL or int(move[1]) < 1 or int(move[1]) > 8:
-			print("BAD INPUT!! " + board.get_player() + " try again")
+			print("BAD INPUT!! " + board.get_player_string() + " try again")
 			return False
 	except ValueError:
-		print("BAD INPUT!! " + board.get_player() + " try again")
+		print("BAD INPUT!! " + board.get_player_string() + " try again")
 		return False
 	return True
 
