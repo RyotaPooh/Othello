@@ -1,0 +1,2 @@
+# Othello
+Othello python app
