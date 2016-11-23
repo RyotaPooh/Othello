@@ -1,2 +1,7 @@
 # Othello
-Othello python app
+Othello python app  
+
+Run:  
+```
+./othello.py
+```
