@@ -1,9 +1,16 @@
 from random import randint
+from player import Player
 
-class AI_Random:
+class AI(Player):
 	def __init__(self, name, piece):
-		self.name = name
-		self.piece = piece
+		Player.__init__(self, name, piece)
+
+	def is_AI(self):
+		return True
+
+class AI_Random(AI):
+	def __init__(self, name, piece):
+		AI.__init__(self, name, piece)
 
 	def get_move(self, board):
 		# Tuple (row, col) of all possible moves
@@ -16,11 +23,23 @@ class AI_Random:
 
 		return possible_moves[randint(0, len(possible_moves) - 1)]
 
-	def is_AI(self):
-		return True
+class AI_Greedy(AI):
+	def __init__(self, name, piece):
+		AI.__init__(self, name, piece)
 
-	def get_piece(self):
-		return self.piece
+	def get_move(self, board):
+		# Tuple (row, col) of all possible moves
+		best_move = ()
+		max_flanked = 0
 
-	def __str__(self):
-		return self.name
+		for row in range(board.size):
+			for col in range(board.size):
+				if board.move_valid(row, col):
+					flanked_piece = board.get_flanked(row, col)
+
+					if flanked_piece:
+						if max_flanked < len(flanked_piece):
+							best_move = (row, col)
+							max_flanked = len(flanked_piece)
+
+		return best_move
