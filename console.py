@@ -2,7 +2,6 @@
 from board import Board
 from board import Mark
 from board import State
-from tkinter import *
 
 def start():
 	print("\nGAME START: ")
