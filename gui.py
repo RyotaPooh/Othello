@@ -98,7 +98,7 @@ class GUI:
 
 			# If out of moves for player
 			if state == State.OUT_OF_MOVE:
-				print(str(self.board.get_opponent()) + " out of moves, " + str(self.board.get_player()) + "'s turn")
+				self.print_text(str(self.board.get_opponent()) + " out of moves, " + str(self.board.get_player()) + "'s turn")
 			else:
 				# Else, AI's turn to move
 				self.ai_move()
@@ -121,6 +121,7 @@ class GUI:
     # Restart button
 	def restart(self):
 		self.started = False
+		self.print_text("RESTART GAME")
 		self.start()
 
 	# End game button
@@ -176,6 +177,7 @@ class GUI:
 		self.text_box.config(state=NORMAL)
 		self.text_box.insert(INSERT, string + "\n")
 		self.text_box.config(state=DISABLED)
+		self.text_box.see(END)
 
 	def run(self):
 		self.set_up_menu()
