@@ -201,6 +201,10 @@ class Board:
 		else:
 			return self.player_black
 
+	# Return the board
+	def get_board(self):
+		return self.board
+
 	# For printing out the board
 	def __str__(self):
 		string = "\n  "
