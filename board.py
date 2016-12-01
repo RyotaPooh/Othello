@@ -25,10 +25,24 @@ class Mark:
 	IDX = {'a':0, 'b':1, 'c':2, 'd':3, 'e':4, 'f':5, 'g':6, 'h':7}
 
 class Board:
-	def __init__(self, name, size, player1, player2):
+	def __init__(self, name="Othello", size=8, player1=None, player2=None, board=None):
 		if not size == 8:
 			print("Size of the board has to be eight for now")
 			sys.exit(1)
+
+		if board:
+			self.name = board.name
+			self.player_black = board.player_black
+			self.player_white = board.player_white
+			self.curr_player = board.curr_player
+			self.curr_opponent = board.curr_opponent
+			self.board = [i[:] for i in board.board]
+			self.size = board.size
+			self.game_ended = board.game_ended
+			return
+
+		if not player1 or not player2:
+			print("Error: Invalid Player")
 
 		self.name = name
 		self.player_black = player1

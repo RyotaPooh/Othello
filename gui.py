@@ -6,7 +6,7 @@ from board import State
 from player import Player
 from ai import *
 import time
-from threading import Thread, Lock
+from threading import Thread, Lock, active_count
 
 # Color to used for the canvas
 class Fill:
@@ -24,7 +24,7 @@ class GUI:
 		self.player_active = False # True = Player input is active
 		self.player_vs_ai = False # True = Player vs ai game has started
 		self.ai_vs_ai = False # True = A game is ongoing, can be player game or ai game
-		self.ai_vs_ai_lock = Lock() # Lock for ai vs ai game thread
+		self.ai_lock = Lock() # Lock for ai vs ai game thread
 		self.ai_stop = False # True = Stop the AI game
 
 		self.app = Tk()
@@ -50,8 +50,8 @@ class GUI:
 			self.ai_stop = False
 			self.print_text("AI GAME (PIT TWO AI AGAINST EACH OTHER)")
 
-			ai1 = AI_Random("AI_RANDOM", Cell.B)
-			ai2 = AI_Greedy_Random("AI_GREEDY_RANDOM", Cell.W)
+			ai1 = AI_Greedy_Random("AI_GREEDY_RANDOM", Cell.B)
+			ai2 = AI_Minimax("AI_MINIMAX", Cell.W)
 			self.board = Board("Othello", self.size, ai1, ai2)
 			self.update_board()
 
@@ -61,13 +61,12 @@ class GUI:
 	# Use thread to run the ai vs ai game
 	def ai_game_thread(self):
 		while True:
-			time.sleep(1)
-			with self.ai_vs_ai_lock:
+			with self.ai_lock:
 				if self.ai_stop or self.check_game_end():
 					self.ai_vs_ai = False
 					return
 
-				self.ai_move()
+			self.ai_move()
 
 	# Set up the game based on which player start first
 	def player_first(self, is_player_first):
@@ -77,41 +76,52 @@ class GUI:
 		if is_player_first:
 			# Player goes first
 			player1 = Player("PLAYER", Cell.B)
-			player2 = AI_Greedy_Random("AI_RANDOM", Cell.W)
+			player2 = AI_Minimax("AI_MINIMAX", Cell.W)
 			self.board = Board("Othello", self.size, player1, player2)
 			self.update_board()
 		else:
 			# AI goes first
-			player1 = AI_Greedy_Random("AI_RANDOM", Cell.B)
+			player1 = AI_Minimax("AI_MINIMAX", Cell.B)
 			player2 = Player("PLAYER", Cell.W)
 			self.board = Board("Othello", self.size, player1, player2)
-			time.sleep(1)
+			self.update_board()
+			self.print_text("AI thinking...")
 			self.ai_move()
 
 		self.player_active = True
 
 	# Ai makes a move
 	def ai_move(self):
+		curr_player = str(self.board.get_player())
 		move = self.board.get_player().get_move(self.board)
+
+		with self.ai_lock:
+			if self.ai_stop:
+				return
+
 		state = self.board.move(move[0], move[1])
 
 		self.update_board()
-		self.print_text(str(self.board.get_player()) + ": (" + str(move[0]) + "," + str(move[1]) + ")")
+		self.print_text(curr_player + ": (" + str(move[0]) + "," + str(move[1]) + ")")
 
 		# If opponent is out of moves, ai moves again
 		if state == State.OUT_OF_MOVE:
 			self.print_text(str(self.board.get_opponent()) + " OUT OF MOVES, " + str(self.board.get_player()) + "'S TURN")
-			time.sleep(1)
 			self.ai_move()
 
 	# Passive open, player makes a move
 	def player_move(self, event):
+		move_thread = Thread(target=self.player_move_thread, daemon=True, args=[event])
+		move_thread.start()
+
+	def player_move_thread(self, event):
 		# player_active allows player click to be read
 		if self.player_active:
 			self.player_active = False
 			x = event.x // self.cell_size
 			y = event.y // self.cell_size
 
+			curr_player = str(self.board.get_player())
 			state = self.board.move(x, y)
 
 			# If move invalid
@@ -122,7 +132,7 @@ class GUI:
 			
 			# Player move is valid and the player makes a move
 			self.update_board()
-			self.print_text(str(self.board.get_player()) + ": (" + str(x) + "," + str(y) + ")")
+			self.print_text(curr_player + ": (" + str(x) + "," + str(y) + ")")
 
 			# Check if game ends
 			if self.check_game_end():
@@ -134,8 +144,14 @@ class GUI:
 				self.print_text(str(self.board.get_opponent()) + " OUT OF MOVES, " + str(self.board.get_player()) + "'S TURN")
 			else:
 				# Else, AI's turn to move
-				time.sleep(1)
+				self.print_text("AI thinking...")
+				
 				self.ai_move()
+
+				with self.ai_lock:
+					if self.ai_stop:
+						return
+
 				if self.check_game_end():
 					self.player_active = False
 					return
@@ -156,9 +172,10 @@ class GUI:
 
 	# Start button, start the game
 	def start(self):
-		if not self.player_vs_ai and not self.ai_vs_ai:
+		if not self.player_vs_ai and not self.ai_vs_ai and active_count() <= 1:
 			# Set the conditions
 			self.player_vs_ai = True
+			self.ai_stop = False
 			self.print_text("Start Othello Game")
 
 			self.top_level = Toplevel()
@@ -181,7 +198,7 @@ class GUI:
 	def stop(self):
 		self.player_vs_ai = False
 		self.player_active = False
-		with self.ai_vs_ai_lock:
+		with self.ai_lock:
 			self.ai_stop = True
 		self.print_text("GAME STOPPED, START THE GAME AGAIN")
 
@@ -189,7 +206,13 @@ class GUI:
 	def restart(self):
 		if self.player_vs_ai:
 			self.player_vs_ai = False
+			with self.ai_lock:
+				self.ai_stop = True
 			self.print_text("RESTART GAME")
+
+			while active_count() > 1:
+				time.sleep(1)
+
 			self.start()
 
 	# End the game, destroy whole app
@@ -253,6 +276,7 @@ class GUI:
 		self.text_box.insert(INSERT, string + "\n")
 		self.text_box.config(state=DISABLED)
 		self.text_box.see(END)
+		self.app.update_idletasks()
 
 	# Run the game
 	def run(self):
