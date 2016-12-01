@@ -80,7 +80,7 @@ class AI_Minimax(AI):
 		self.best_cell = [(0,0), (0,7), (7,0), (7,7)]
 
 	def get_move(self, board):
-		best_move = self.first_move(board, 5)
+		best_move = self.first_move(board, 4)
 
 		if not best_move:
 			print("Something's wrong")
@@ -91,12 +91,14 @@ class AI_Minimax(AI):
 		# Loop through all possible moves
 		max_score = -10000
 		best_move = None
-
+		num = 0 # tmp
+		x_time = time.time()
 		for row in range(board.size):
 			for col in range(board.size):
 				if board.move_valid(row, col):
 					new_board = Board(board=board)
 					state = new_board.move(row, col)
+					num += 1 # tmp
 
 					if state == State.OUT_OF_MOVE:
 						score = self.max_move(new_board, max_depth, 1)
@@ -106,7 +108,7 @@ class AI_Minimax(AI):
 					if score > max_score:
 						max_score = score
 						best_move = (row, col)
-
+		print(str(num) + "," + str(time.time() - x_time))
 		return best_move
 
 	def max_move(self, board, max_depth, curr_depth):
