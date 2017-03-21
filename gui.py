@@ -45,7 +45,7 @@ class GUI:
 
 	# Pit ai against another ai
 	def ai_game(self):
-		if not self.ai_vs_ai and not self.player_vs_ai:
+		if not self.ai_vs_ai and not self.player_vs_ai and active_count() <= 1:
 			self.ai_vs_ai = True
 			self.ai_stop = False
 			self.print_text("AI GAME (PIT TWO AI AGAINST EACH OTHER)")

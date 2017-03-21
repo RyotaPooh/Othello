@@ -41,9 +41,6 @@ class Board:
 			self.game_ended = board.game_ended
 			return
 
-		if not player1 or not player2:
-			print("Error: Invalid Player")
-
 		self.name = name
 		self.player_black = player1
 		self.player_white = player2
@@ -53,6 +50,7 @@ class Board:
 		self.size = size
 		self.game_ended = False
 
+		# Initial game setup
 		self.board[3][3] = Cell.W
 		self.board[3][4] = Cell.B
 		self.board[4][3] = Cell.B
@@ -71,13 +69,19 @@ class Board:
 		else:
 			return State.INVALID_MOVE
 
+		# Switch player
 		self.switch_player()
 
+		# Check if move exist for the next player
 		if not self.move_exist():
+			# If move doesn't exist, change back the player
 			self.switch_player()
+			# If move still doesn't exist
 			if not self.move_exist():
+				# End game
 				self.game_ended = True
 			else:
+				# Opponent player out of move
 				return State.OUT_OF_MOVE
 
 	# Return True if a valid move exist, else return False

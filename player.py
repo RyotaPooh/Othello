@@ -12,5 +12,8 @@ class Player:
 	def is_AI(self):
 		return False
 
+	def is_this_player(self, name):
+		return name == self.name
+
 	def __str__(self):
 		return self.name

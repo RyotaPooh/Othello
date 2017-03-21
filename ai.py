@@ -25,7 +25,6 @@ class AI_Random(AI):
 				if board.move_valid(row, col):
 					possible_moves += [(row, col)]
 
-		time.sleep(1)
 		return possible_moves[randint(0, len(possible_moves) - 1)]
 
 class AI_Greedy_First(AI):
@@ -47,7 +46,6 @@ class AI_Greedy_First(AI):
 							best_move = (row, col)
 							max_flanked = len(flanked_piece)
 
-		time.sleep(1)
 		return best_move
 
 class AI_Greedy_Random(AI):
@@ -71,7 +69,6 @@ class AI_Greedy_Random(AI):
 						elif max_flanked == len(flanked_piece):
 							best_moves += [(row, col)]
 
-		time.sleep(1)
 		return best_moves[randint(0, len(best_moves) - 1)]
 
 class AI_Minimax(AI):
@@ -80,7 +77,7 @@ class AI_Minimax(AI):
 		self.best_cell = [(0,0), (0,7), (7,0), (7,7)]
 
 	def get_move(self, board):
-		best_move = self.first_move(board, 4)
+		best_move = self.first_move(board, 5)
 
 		if not best_move:
 			print("Something's wrong")
@@ -91,14 +88,12 @@ class AI_Minimax(AI):
 		# Loop through all possible moves
 		max_score = -10000
 		best_move = None
-		num = 0 # tmp
-		x_time = time.time()
+
 		for row in range(board.size):
 			for col in range(board.size):
 				if board.move_valid(row, col):
 					new_board = Board(board=board)
 					state = new_board.move(row, col)
-					num += 1 # tmp
 
 					if state == State.OUT_OF_MOVE:
 						score = self.max_move(new_board, max_depth, 1)
@@ -108,7 +103,6 @@ class AI_Minimax(AI):
 					if score > max_score:
 						max_score = score
 						best_move = (row, col)
-		print(str(num) + "," + str(time.time() - x_time))
 		return best_move
 
 	def max_move(self, board, max_depth, curr_depth):

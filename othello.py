@@ -20,16 +20,19 @@ def main():
 		opt = input("Do you want to start first, 'y' or 'n': ")
 
 		if opt.lower() == 'y':
+			# Player 1 starts first
 			player1 = Player("BLACK", Cell.B)
 			player2 = AI_Random("AI_RANDOM", Cell.W)
 			cs.main(size, player1, player2)
 		elif opt.lower() == 'n':
+			# AI starts first
 			player1 = AI_Random("AI_RANDOM", Cell.B)
 			player2 = Player("WHITE", Cell.W)
 			cs.main(size, player1, player2)
 		else:
 			print("Wrong input, try again, exiting")
 	else:
+		# Run using Tkinter GUI
 		player1 = Player("BLACK", Cell.B)
 		player2 = Player("WHITE", Cell.W)
 		gui = GUI(size, player1, player2)
